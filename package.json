@@ -1,0 +1,10 @@
+{
+  "name": "socket-server",
+  "version": "0.1.0",
+  "description": "socker.io server for app",
+  "main": "server.js",
+  "author": "Tony Chen",
+  "dependencies": {
+    "socket.io": "1.0.4"
+  }
+}

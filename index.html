@@ -1,0 +1,49 @@
+<!Doctype html>
+<html>
+<head>
+	<title>公交版</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width,user-scalable=no" />
+
+</head>
+<body>
+	<h2>我是
+	<select id="busNo">
+		<option value="10">10路车</option>
+		<option value="531">531路车</option>
+		<option value="202">202路车</option>
+		<option value="406">406路车</option>
+	</select>
+	</h2>
+	<input type="button" value="让小伙伴们找我吧" onclick="findMe()" />
+	<div id="support"></div>
+	<div id="MylocCont"></div>
+	<script src="socket.io.js"></script>
+    <script type="text/javascript">
+    var socket;
+    var BUSNO
+	function findMe(){   
+		BUSNO = document.getElementById('busNo').value;
+		socket = io.connect('http://localhost:3000/'); 	 
+    	socket.on('serverOk', function() {
+	        alert("ok,开始发送你的位置！");
+	        emitMyLoc();
+	        setInterval("emitMyLoc()",5000)
+    	});
+	}
+	function emitMyLoc(){
+		if(navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(showPosition);
+		} else {
+		}
+	}
+	function showPosition(position) {
+	    var latlon = position.coords.latitude + "," + position.coords.longitude;
+	    var Loclong=position.coords.longitude;
+	    var Loclat=position.coords.latitude;
+	    socket.emit("MyLocF",{ myLoc:{locLong:Loclong,locLat:Loclat}, myId:BUSNO});
+	    document.getElementById("MylocCont").innerHTML = "我的位置是：" + latlon;
+	}
+	</script>
+</body>
+</html>
