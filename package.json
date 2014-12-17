@@ -1,10 +1,11 @@
 {
-  "name": "socket-server",
+  "name": "busHere",
   "version": "0.1.0",
   "description": "socker.io server for app",
   "main": "server.js",
   "author": "Tony Chen",
   "dependencies": {
+    "redis": "^0.12.1",
     "socket.io": "1.0.4"
   }
 }

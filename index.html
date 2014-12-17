@@ -1,49 +1,54 @@
-<!Doctype html>
+<!doctype html>
 <html>
-<head>
-	<title>公交版</title>
-	<meta charset="utf-8"/>
-	<meta name="viewport" content="width=device-width,user-scalable=no" />
 
+<head>
+    <title>用户版</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,user-scalable=no" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/mobilebone.css" />
 </head>
 <body>
-	<h2>我是
-	<select id="busNo">
-		<option value="10">10路车</option>
-		<option value="531">531路车</option>
-		<option value="202">202路车</option>
-		<option value="406">406路车</option>
-	</select>
-	</h2>
-	<input type="button" value="让小伙伴们找我吧" onclick="findMe()" />
-	<div id="support"></div>
-	<div id="MylocCont"></div>
-	<script src="js/socket.io.js"></script>
-    <script type="text/javascript">
-    var socket;
-    var BUSNO
-	function findMe(){   
-		BUSNO = document.getElementById('busNo').value;
-		socket = io.connect('http://localhost:3000/'); 	 
-    	socket.on('serverOk', function() {
-	        alert("ok,开始发送你的位置！");
-	        emitMyLoc();
-	        setInterval("emitMyLoc()",5000)
-    	});
-	}
-	function emitMyLoc(){
-		if(navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(showPosition);
-		} else {
-		}
-	}
-	function showPosition(position) {
-	    var latlon = position.coords.latitude + "," + position.coords.longitude;
-	    var Loclong=position.coords.longitude;
-	    var Loclat=position.coords.latitude;
-	    socket.emit("MyLocF",{ myLoc:{locLong:Loclong,locLat:Loclat}, myId:BUSNO});
-	    document.getElementById("MylocCont").innerHTML = "我的位置是：" + latlon;
-	}
-	</script>
+    <div id="loading">
+        <div id="loadingImg">
+            <div class="circle"></div>
+            <div class="circle1"></div>
+        </div>
+    </div>
+    <div id="pageHome" class="page out">
+        <div class="header">
+            <h1>实时公交首页</h1>
+        </div>
+        <div class="content">
+            <select id="citySelect">
+                <option value="beijing">北京</option>
+                <option value="shanghai">上海</option>
+                <option value="dalian">大连</option>
+            </select>
+            <select id="busNoSelect">
+                <option value="10">10路车</option>
+                <option value="531">531路车</option>
+                <option value="202">202路车</option>
+                <option value="406">406路车</option>
+            </select>
+            <a href="#page1" onclick="findBus()" > 查询车</a>
+            <!-- <input type="button" value="定位我自己" onclick="ImHere()"> -->
+        </div>
+    </div>
+    <div id="page1" class="page out">
+        <div class="header">
+            <a href="javascript:" data-rel="back">返回</a>
+            <h1>实时公交展示页面</h1>
+        </div>
+        <div class="content">
+            <div id="myMap"></div>
+        </div>
+    </div>
+    <script src="js/mobilebone.js"></script>
+    <script src="js/socket.io.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=4leXfSteZ2tqqZcM1u02fol7"></script>
+    <script type="text/javascript" src="http://developer.baidu.com/map/jsdemo/demo/convertor.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
 </body>
+
 </html>
