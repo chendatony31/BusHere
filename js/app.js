@@ -52,7 +52,10 @@ function locateMe() {
         navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
             timeout: 10000
         });
-    } else {}
+    } else {
+        alert('不支持定位,请你选择城市');
+        errorCallback();
+    }
 }
 
 function successCallback(position) {
