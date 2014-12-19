@@ -1,112 +1,169 @@
-var connTimeout = setTimeout("alert('连接服务器超时，请确认网络连接')", 10000);
-var socket = io.connect('http://localhost:3000/');
-socket.on('serverOk', function() {
-    clearTimeout(connTimeout);
-    alert('已经连接到服务器');
-    console.log('已连接服务器！');
-    locateMe();
-});
-socket.on('disconnect', function() {
-    console.log('断开连接');
-    alert('连接断开');
-});
+(function () {
+    console.log(this);
 
-var map = new BMap.Map("myMap");
-// map.centerAndZoom(new BMap.Point(116.404, 39.915), 11); // 初始化地图,设置中心点坐标和地图级别
-// map.addControl(new BMap.MapTypeControl()); //添加地图类型控件
-// map.setCurrentCity("北京"); // 设置地图显示的城市 此项是必须设置的
-// map.enableScrollWheelZoom(true);
-var myBaiduPoint;
-var RANGE = 2000;
-var BUSNO;
-var busline = new BMap.BusLineSearch(map, {
-    renderOptions: {
-        map: map
-    },
-    onGetBusListComplete: function(result) {
-        if (result) {
-            var fstLine = result.getBusListItem(0);
-            busline.getBusLine(fstLine);
+    /************************ 全局变量 ************************/
+    var connTimeout = setTimeout("alert('连接服务器超时，请确认网络连接')", 10000);
+    var socket = io.connect('http://localhost:3000/');
+    var myBaiduPoint;
+    var RANGE = 2000;
+    var BUSNO;
+    var map;
+    var busline;
+    var localCity;
+    var queryCity = '';
+    var currentBusNoArr;
+    var cityInfo;
+    var enableGeo = false;
+
+    socket.on('serverOk', function(data) {
+        clearTimeout(connTimeout);
+
+        cityInfo = data;
+        var isFirstCity = true;
+        for (city in cityInfo) {
+            $('#citySelect').append('<option value="' + city + '" >' + city + '</option>');
+            if (isFirstCity){
+                currentBusNoArr = cityInfo[city].split(',');
+                isFirstCity = false;
+            }
+        }
+        for (var i = 0;i < currentBusNoArr.length;i++) {
+            $('#busNoSelect').append('<option value="' + currentBusNoArr[i]
+                                    + '" >' + currentBusNoArr[i] + '</option>');
+        }
+
+        console.log('已连接服务器！');
+        locateMe();
+    });
+    socket.on('disconnect', function() {
+        console.log('断开连接');
+        alert('连接断开');
+    });
+
+    /************************ 地位用户 ************************/
+    function locateMe() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
+                timeout: 1000
+            });
+        } else {
+            alert('不支持定位,请你选择城市');
+            $('#loading').hide();
+            initMap();
         }
     }
-});
-
-map.addControl(new BMap.ScaleControl({
-    anchor: BMAP_ANCHOR_TOP_RIGHT
-}));
-map.addControl(new BMap.NavigationControl());
-var styleJson = [{
-    "featureType": "all",
-    "elementType": "all",
-    "stylers": {
-        "lightness": 10,
-        "saturation": -100
+    function successCallback(position) {
+        enableGeo = true;
+        var locLong = position.coords.longitude;
+        var locLat = position.coords.latitude;
+        var myGpsPoint = new BMap.Point(locLong, locLat);
+        BMap.Convertor.translate(myGpsPoint, 0, translateCallback); //真实经纬度转成百度坐标
     }
-}];
-map.setMapStyle({
-    styleJson: styleJson
-});
-
-function locateMe() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
-            timeout: 10000
+    var translateCallback = function(point) {
+        myBaiduPoint = point;
+        var geoc = new BMap.Geocoder();
+        geoc.getLocation(myBaiduPoint, function(data) {
+            var addComp = data.addressComponents;
+            alert(addComp.city);
+            localCity = addComp.city;
+            $('#citySelect').val(localCity);
         });
-    } else {
-        alert('不支持定位,请你选择城市');
-        errorCallback();
+        $('#loading').hide();
+        initMap();
+    };
+    function errorCallback() {
+        console.log('定位失败');
+        $('#loading').hide();
+        initMap();
     }
-}
 
-function successCallback(position) {
-    var locLong = position.coords.longitude;
-    var locLat = position.coords.latitude;
-    var myGpsPoint = new BMap.Point(locLong, locLat);
-    BMap.Convertor.translate(myGpsPoint, 0, translateCallback); //真实经纬度转成百度坐标
-}
-
-function errorCallback() {
-    console.log('定位失败');
-    alert('无法获取您的地理位置，请选择你的城市');
-    document.getElementById('loading').style.display = "none";
-}
-var translateCallback = function(point) {
-    myBaiduPoint = point;
-    var geoc = new BMap.Geocoder();
-    geoc.getLocation(myBaiduPoint, function(data) {
-        var addComp = data.addressComponents;
-        alert(addComp.city);
-    });
-    // map.centerAndZoom(point, 15);
-    // map.enableScrollWheelZoom();
-    // var marker = new BMap.Marker(point);
-    // map.addOverlay(marker);
-    document.getElementById('loading').style.display = "none";
-};
-
-
-function findBus() {
-    document.getElementById('loading').style.display = "block";
-    BUSNO = document.getElementById('busNoSelect').value;
-
-    busline.getBusList(BUSNO);
-    busline.setPolylinesSetCallback(findingBus);
-}
-
-function findingBus() {
-
-    locateMe();
-    socket.emit('BusWantedF', BUSNO);
-    socket.on('BusLocF', function(data) {
-        console.log('收到信号');
-        var busGpsPoint = new BMap.Point(data.myLoc.locLong, data.myLoc.locLat);
-        BMap.Convertor.translate(busGpsPoint, 0, translateCallbackBus);
-    });
-}
-var translateCallbackBus = function(point) {
-    var distance = map.getDistance(myBaiduPoint, point);
-    if (distance < RANGE) {
-        var marker = new BMap.Marker(point);
-        map.addOverlay(marker);
+    /************************ 初始化地图 ************************/
+    function initMap() {
+        map = new BMap.Map("myMap");
+        alert(map);
+        map.centerAndZoom('北京',15);
+        if (enableGeo) {
+            map.centerAndZoom(myBaiduPoint, 11);
+        }
+        else {
+            var city = $('#citySelect').val();
+            map.centerAndZoom('city',15);
+        }
+        map.addControl(new BMap.ScaleControl({
+        anchor: BMAP_ANCHOR_TOP_RIGHT
+        }));
+        map.addControl(new BMap.NavigationControl());
+        var styleJson = [{
+            "featureType": "all",
+            "elementType": "all",
+            "stylers": {
+                "lightness": 10,
+                "saturation": -100
+            }
+        }];
+        map.setMapStyle({
+            styleJson: styleJson
+        });
+        map.enableScrollWheelZoom(true);
+        busline = new BMap.BusLineSearch(map, {
+            renderOptions: {
+                map: map
+            },
+            onGetBusListComplete: function(result) {
+                if (result) {
+                    var fstLine = result.getBusListItem(0);
+                    busline.getBusLine(fstLine);
+                }
+            }
+        });
     }
-};
+
+    /************************ 转换地图 ************************/
+    $('#citySelect').on('change', function(e){
+        queryCity = e.target.value;
+        var city = $('#citySelect').val();
+        map.centerAndZoom(city,15);
+        updateCityBusNo(queryCity);
+    });
+
+    function updateCityBusNo(queryCity) {
+        $('#busNoSelect').html('');
+        currentBusNoArr = cityInfo[queryCity].split(',');
+        for (var i = 0;i < currentBusNoArr.length;i++) {
+            $('#busNoSelect').append('<option value="' + currentBusNoArr[i]
+                    + '" >' + currentBusNoArr[i] + '</option>');
+        }
+    }
+
+
+    /************************ 寻找车辆 ************************/
+
+    $('#queryBtn').on('click', function(e) {
+        findBus();
+    });
+
+    function findBus() {
+        BUSNO = $('#busNoSelect').val();
+        busline.setPolylinesSetCallback(findingBus);
+        busline.getBusList(BUSNO);
+    }
+
+    function findingBus() {
+        socket.emit('BusWantedF', BUSNO);
+        socket.on('BusLocF', function(data) {
+            console.log('收到信号');
+            var busGpsPoint = new BMap.Point(data.myLoc.locLong, data.myLoc.locLat);
+            BMap.Convertor.translate(busGpsPoint, 0, translateCallbackBus);
+        });
+    }
+    var translateCallbackBus = function(point) {
+        var distance = map.getDistance(myBaiduPoint, point);
+        if (distance < RANGE) {
+            var marker = new BMap.Marker(point);
+            map.addOverlay(marker);
+        }
+    };
+
+    console.log(this);
+
+})()

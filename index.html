@@ -2,12 +2,13 @@
 <html>
 
 <head>
-    <title>用户版</title>
+    <title>实时公交查询系统</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,user-scalable=no" />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/mobilebone.css" />
 </head>
+
 <body>
     <div id="loading">
         <div id="loadingImg">
@@ -17,34 +18,40 @@
     </div>
     <div id="pageHome" class="page out">
         <div class="header">
-            <h1>实时公交首页</h1>
+            <h1>实时公交查询系统</h1>
         </div>
         <div class="content">
-            <select id="citySelect">
-                <option value="beijing">北京</option>
-                <option value="shanghai">上海</option>
-                <option value="dalian">大连</option>
-            </select>
-            <select id="busNoSelect">
-                <option value="10">10路车</option>
-                <option value="531">531路车</option>
-                <option value="202">202路车</option>
-                <option value="406">406路车</option>
-            </select>
-            <a href="#page1" onclick="findBus()" > 查询车</a>
-            <!-- <input type="button" value="定位我自己" onclick="ImHere()"> -->
+            <div class="row"></div>
+            <div class="row"></div>
+            <div class="row">
+                <select id="citySelect" class="ui">
+                </select>
+            </div>
+            <div class="row">
+                <select id="busNoSelect" class="ui">
+                </select>
+            </div>
+            <div class="row">
+                <a id="queryBtn"  class="ui" href="#page1"> <span class="icon search"></span>查询车</a>
+            </div>
         </div>
     </div>
     <div id="page1" class="page out">
         <div class="header">
-            <a href="javascript:" data-rel="back">返回</a>
+            <a href="javascript:" data-rel="back">
+            <span class="icon back"></span>
+            </a>
             <h1>实时公交展示页面</h1>
         </div>
         <div class="content">
             <div id="myMap"></div>
         </div>
     </div>
+
+
+    <script src="js/zepto.min.js"></script>
     <script src="js/mobilebone.js"></script>
+    <!-- <script src="js/jquery-1.11.2.min.js"></script> -->
     <script src="js/socket.io.js"></script>
     <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=4leXfSteZ2tqqZcM1u02fol7"></script>
     <script type="text/javascript" src="http://developer.baidu.com/map/jsdemo/demo/convertor.js"></script>

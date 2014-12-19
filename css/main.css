@@ -3,48 +3,16 @@ html, body, #myMap {
     height: 100%;
     overflow: hidden;
     margin: 0;
+    font-family: "Helvetica Neue", Helvetica, "Microsoft Yahei", Arial, sans-serif;
 }
 a {
     text-decoration: none;
     color: inherit;
 }
-#tools {
-    position: fixed;
-    width: 100%;
-    text-align: center;
-    margin: auto;
-    bottom: 20px;
-    z-index: 99;
-    padding: 8px;
-    background: #ebf1f6;
-    /* Old browsers */
-
-    background: -moz-linear-gradient(top, #ebf1f6 0%, #abd3ee 50%, #89c3eb 51%, #d5ebfb 100%);
-    /* FF3.6+ */
-
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ebf1f6), color-stop(50%, #abd3ee), color-stop(51%, #89c3eb), color-stop(100%, #d5ebfb));
-    /* Chrome,Safari4+ */
-
-    background: -webkit-linear-gradient(top, #ebf1f6 0%, #abd3ee 50%, #89c3eb 51%, #d5ebfb 100%);
-    /* Chrome10+,Safari5.1+ */
-
-    background: -o-linear-gradient(top, #ebf1f6 0%, #abd3ee 50%, #89c3eb 51%, #d5ebfb 100%);
-    /* Opera 11.10+ */
-
-    background: -ms-linear-gradient(top, #ebf1f6 0%, #abd3ee 50%, #89c3eb 51%, #d5ebfb 100%);
-    /* IE10+ */
-
-    background: linear-gradient(to bottom, #ebf1f6 0%, #abd3ee 50%, #89c3eb 51%, #d5ebfb 100%);
-    /* W3C */
+body {
+    background-color: #2b313b;
 }
-#tools input {
-    height: 36px;
-    font-size: 16px;
-}
-#busNoSelect {
-    height: 36px;
-    font-size: 16px;
-}
+
 #loading {
     display: block;
     position: absolute;
@@ -197,9 +165,10 @@ a {
 .header {
     height: 36px;
     top: 0;
-    background-color: #333;
+    background-color: #2b313b;
     color: #fff;
     z-index: 1;
+    border-bottom: 1px solid #122121
 }
 .header > h1 {
     margin: 0;
@@ -209,18 +178,50 @@ a {
 }
 .header > a[data-rel="back"] {
     position: absolute;
-    padding: 5px 10px;
-    margin: 3px 10px;
-    border: 1px solid #666;
-    border-radius: 4px;
-    background-color: #5e5e5e;
-    font-size: 14px;
+    line-height: 36px;
+    padding: 0 4px 0 8px;
+    border-right: 1px solid #222;
 }
 .content {
-    padding: 10px;
+    padding: 0 10px;
     position: absolute;
     top: 36px;
-    bottom: 40px;
+    bottom: 0;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
+}
+.row {
+    width: 100%;
+    height: 36px;
+    margin-bottom: 15px;
+}
+.ui {
+    display: block;
+    width: 100%;
+    height: 36px;
+    font-size:16px;
+    border-radius: 2px;
+}
+.icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.search {
+    position: relative;
+    top: -1px;
+    background: url('../images/search.png') no-repeat;
+}
+.back {
+    background: url('../images/return.png') no-repeat;
+}
+
+#queryBtn {
+    display: block;
+    text-align: center;
+    line-height: 36px;
+    color: #fff;
+    background-color: #1fbba6;
 }
