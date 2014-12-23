@@ -1,49 +1,81 @@
 <!Doctype html>
 <html>
 <head>
-	<title>公交版</title>
-	<meta charset="utf-8"/>
-	<meta name="viewport" content="width=device-width,user-scalable=no" />
+    <title>公交版</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,user-scalable=no" />
 
 </head>
 <body>
-	<h2>我是
-	<select id="busNo">
-		<option value="10">10路车</option>
-		<option value="531">531路车</option>
-		<option value="202">202路车</option>
-		<option value="406">406路车</option>
-	</select>
-	</h2>
-	<input type="button" value="让小伙伴们找我吧" onclick="findMe()" />
-	<div id="support"></div>
-	<div id="MylocCont"></div>
-	<script src="js/socket.io.js"></script>
+    <select id="citySelect" class="ui">
+    </select>
+    <select id="busNoSelect" class="ui">
+    </select>
+    <input type="text" id="busId" />
+    <input type="button" value="发送位置信息" onclick="findMe()" />
+    <div id="support"></div>
+    <div id="MylocCont"></div>
+    <script src="js/jquery-1.11.2.min.js"></script> 
+    <script src="js/socket.io.js"></script>
     <script type="text/javascript">
-    var socket;
-    var BUSNO
-	function findMe(){   
-		BUSNO = document.getElementById('busNo').value;
-		socket = io.connect('http://localhost:3000/'); 	 
-    	socket.on('serverOk', function() {
-	        alert("ok,开始发送你的位置！");
-	        emitMyLoc();
-	        setInterval("emitMyLoc()",5000)
-    	});
-	}
-	function emitMyLoc(){
-		if(navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(showPosition);
-		} else {
-		}
-	}
-	function showPosition(position) {
-	    var latlon = position.coords.latitude + "," + position.coords.longitude;
-	    var Loclong=position.coords.longitude;
-	    var Loclat=position.coords.latitude;
-	    socket.emit("MyLocF",{ myLoc:{locLong:Loclong,locLat:Loclat}, myId:BUSNO});
-	    document.getElementById("MylocCont").innerHTML = "我的位置是：" + latlon;
-	}
-	</script>
+    var connTimeout = setTimeout("alert('连接服务器超时，请确认网络连接')", 10000);
+    var socket = io.connect('http://localhost:3000/'); 
+    var cityInfo;  
+    var localCity;
+    var BUSNO;
+    var BUSID
+    var currentBusNoArr;
+    socket.on('serverOk', function(data) {
+        clearTimeout(connTimeout);
+
+        cityInfo = data;
+        var isFirstCity = true;
+        for (city in cityInfo) {
+            $('#citySelect').append('<option value="' + city + '" >' + city + '</option>');
+            if (isFirstCity){
+                currentBusNoArr = cityInfo[city].split(',');
+                isFirstCity = false;
+            }
+        }
+        for (var i = 0;i < currentBusNoArr.length;i++) {
+            $('#busNoSelect').append('<option value="' + currentBusNoArr[i]
+                                    + '" >' + currentBusNoArr[i] + '</option>');
+        }
+
+    });
+    $('#citySelect').on('change', changeCity);
+    function changeCity() {
+        var city = $('#citySelect').val();
+        $('#busNoSelect').html('');
+        currentBusNoArr = cityInfo[city].split(',');
+        for (var i = 0;i < currentBusNoArr.length;i++) {
+            $('#busNoSelect').append('<option value="' + currentBusNoArr[i]
+                    + '" >' + currentBusNoArr[i] + '</option>');
+        }
+    }
+
+    function findMe(){   
+        //验证
+        BUSID = $('#busId').val();
+        BUSNO = $('#busNoSelect').val();
+        localCity = $('#citySelect').val();
+        alert(BUSNO);
+        emitMyLoc();
+        setInterval("emitMyLoc()",5000)
+    }
+    function emitMyLoc(){
+        if(navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+        }
+    }
+    function showPosition(position) {
+        var latlon = position.coords.latitude + "," + position.coords.longitude;
+        var Loclong=position.coords.longitude;
+        var Loclat=position.coords.latitude;
+        socket.emit("MyInfo",{ myLoc:{locLong:Loclong,locLat:Loclat}, myBusLine:BUSNO,myBusId:BUSID, city:localCity});
+        document.getElementById("MylocCont").innerHTML = "我的位置是：" + latlon;
+    }
+    </script>
 </body>
 </html>

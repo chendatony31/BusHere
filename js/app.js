@@ -40,7 +40,7 @@
         alert('连接断开');
     });
 
-    /************************ 地位用户 ************************/
+    /************************ 定位用户 ************************/
     function locateMe() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(successCallback, errorCallback, {
@@ -64,9 +64,9 @@
         var geoc = new BMap.Geocoder();
         geoc.getLocation(myBaiduPoint, function(data) {
             var addComp = data.addressComponents;
-            alert(addComp.city);
             localCity = addComp.city;
             $('#citySelect').val(localCity);
+            changeCity();
         });
         $('#loading').hide();
         initMap();
@@ -80,7 +80,6 @@
     /************************ 初始化地图 ************************/
     function initMap() {
         map = new BMap.Map("myMap");
-        alert(map);
         map.centerAndZoom('北京',15);
         if (enableGeo) {
             map.centerAndZoom(myBaiduPoint, 11);
@@ -119,16 +118,17 @@
     }
 
     /************************ 转换地图 ************************/
-    $('#citySelect').on('change', function(e){
-        queryCity = e.target.value;
+    $('#citySelect').on('change', changeCity);
+
+    function changeCity() {
         var city = $('#citySelect').val();
         map.centerAndZoom(city,15);
-        updateCityBusNo(queryCity);
-    });
+        updateCityBusNo(city);
+    }
 
-    function updateCityBusNo(queryCity) {
+    function updateCityBusNo(city) {
         $('#busNoSelect').html('');
-        currentBusNoArr = cityInfo[queryCity].split(',');
+        currentBusNoArr = cityInfo[city].split(',');
         for (var i = 0;i < currentBusNoArr.length;i++) {
             $('#busNoSelect').append('<option value="' + currentBusNoArr[i]
                     + '" >' + currentBusNoArr[i] + '</option>');
@@ -144,24 +144,27 @@
 
     function findBus() {
         BUSNO = $('#busNoSelect').val();
+        
         busline.setPolylinesSetCallback(findingBus);
         busline.getBusList(BUSNO);
     }
 
     function findingBus() {
-        socket.emit('BusWantedF', BUSNO);
+        alert('要车的信息');
+        queryCity = $('#citySelect').val();
+        socket.emit('BusWantedF', {busNo:BUSNO,city:queryCity});
         socket.on('BusLocF', function(data) {
             console.log('收到信号');
-            var busGpsPoint = new BMap.Point(data.myLoc.locLong, data.myLoc.locLat);
+            var busGpsPoint = new BMap.Point(data.locLong, data.locLat);
             BMap.Convertor.translate(busGpsPoint, 0, translateCallbackBus);
         });
     }
     var translateCallbackBus = function(point) {
-        var distance = map.getDistance(myBaiduPoint, point);
-        if (distance < RANGE) {
+        // var distance = map.getDistance(myBaiduPoint, point);
+        // if (distance < RANGE) {
             var marker = new BMap.Marker(point);
             map.addOverlay(marker);
-        }
+        // }
     };
 
     console.log(this);
