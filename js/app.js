@@ -144,7 +144,6 @@
 
     function findBus() {
         BUSNO = $('#busNoSelect').val();
-        
         busline.setPolylinesSetCallback(findingBus);
         busline.getBusList(BUSNO);
     }
@@ -153,6 +152,16 @@
         alert('要车的信息');
         queryCity = $('#citySelect').val();
         socket.emit('BusWantedF', {busNo:BUSNO,city:queryCity});
+        socket.on('initInfo', function(data) {
+            
+            
+            var polyline = new BMap.Polyline([
+                new BMap.Point(116.399, 39.910),
+                new BMap.Point(116.405, 39.920),
+                new BMap.Point(116.425, 39.900)
+            ], {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5}); 
+            map.addOverlay(polyline);
+        });
         socket.on('BusLocF', function(data) {
             console.log('收到信号');
             var busGpsPoint = new BMap.Point(data.locLong, data.locLat);

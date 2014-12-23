@@ -16,10 +16,22 @@ io.on('connection', function(socket) {
     //用户
     socket.on('BusWantedF', function(data) {
         console.log('用户需要' + data.city + '的' + data.busNo + '路车的数据');
+        var busSetId = data.city + ':' + data.busNo;
+        console.log(busSetId);
+        client.smembers(busSetId, function(error, data){
+            console.log(data);
+            // for (bus in data) {
+            //     console.log(bus);
+            // }
+        });
+
+        // var initData = 
         var room = data.city+''+data.busNo;
         console.log('用户入房间' + room);
         socket.join(room);
     });
+
+
     //Bus
     socket.on('MyInfo', function(data) {
         console.log('ID:' + data.myBusId + 'city:' + data.city + 'Line:' 
